@@ -10,14 +10,19 @@
 	<h2>Routes</h2>
 	<ul>
 		<li>
+			GET /
+			<br>
+			You are here.
+		</li>
+		<li>
 			🔐 GET /users
 			<br>
 			Returns all users.
 		</li>
 		<li>
-			🔐 GET /users/{id}
+			🔐 GET /users/{specifier}
 			<br>
-			Returns the user with the specified id if it exists, otherwise it returns status 204.
+			Returns a user with the corresponding specifier (either an id or username) if it exists.
 		</li>
 		<li>
 			POST /sign-up
@@ -29,22 +34,15 @@
 			<br>
 			Returns a JWT that is used as bearer token in secure routes requiring authentication.
 		</li>
+		<li>
+			🔐 PUT /change-username
+			<br>
+			Changes your username to a new one if the new one is not already in use.
+		</li>
 	</ul>
 	<h2>Notes</h2>
 	<ul>
 		<li>Routes with the 🔐 requires authentication.</li>
-		<li>Both /sign-in and /sign-up require data in the form of a JSON object with a username and password field. See example below:
-			<br>
-			JSON example:
-			<br>
-			{
-			<br>
-			&emsp;"username": "neo",
-			<br>
-			&emsp;"password": "gulgul"
-			<br>
-			}
-		</li>
 	</ul>
 </body>
 </html>
