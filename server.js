@@ -96,6 +96,14 @@ const maxUsernameLength = 30
 const app = express()
 app.use(bodyParser.json())
 
+const requestLogger = (req, res, next) => {
+	const date = Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "long"}).format(Date.now())
+	console.log(`${req.ip} [${date}] ${req.method} ${req.url}`)
+	next()
+}
+
+app.use(requestLogger)
+
 app.listen(port, () => {
 	console.log(`Server listening on port: ${port}`)
 })
