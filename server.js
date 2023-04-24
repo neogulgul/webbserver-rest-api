@@ -52,7 +52,7 @@ function databaseError(res) {
 	res.status(503).send("Database error :(")
 }
 
-function getJWT(req, res) {
+async function getJWT(req, res) {
 	const authHeader = req.headers["authorization"]
 	if (authHeader === undefined) {
 		res.status(400).send("No JWT >:|")
@@ -63,7 +63,22 @@ function getJWT(req, res) {
 
 	try {
 		const decoded = jwt.verify(token, tokenSecret)
-		return decoded
+
+		const id = decoded.sub
+		const sql = db.prepSQL("SELECT * FROM users WHERE id = ?", [id])
+		const result = await db.SELECT(sql)
+		if (!result) {
+			databaseError(res)
+			return false
+		}
+
+		const valid = result.length === 1
+		if (valid) {
+			return decoded
+		}
+
+		res.status(403).send("You don't exist ¯\\_(ツ)_/¯")
+		return false
 	} catch (err) {
 		console.log(err)
 		res.status(403).send("Invalid JWT >:|")
@@ -90,7 +105,7 @@ app.get("/", (req, res) => {
 })
 
 app.get("/users", async (req, res) => {
-	const JWT = getJWT(req, res)
+	const JWT = await getJWT(req, res)
 	if (!JWT) { return }
 
 	const result = await db.SELECT("SELECT * FROM users")
@@ -102,7 +117,7 @@ app.get("/users", async (req, res) => {
 })
 
 app.get("/users/:specifier", async (req, res) => {
-	const JWT = getJWT(req, res)
+	const JWT = await getJWT(req, res)
 	if (!JWT) { return }
 
 	const specifier = req.params.specifier
@@ -179,7 +194,7 @@ app.post("/sign-in", async (req, res) => {
 })
 
 app.put("/change-username", async (req, res) => {
-	const JWT = getJWT(req, res)
+	const JWT = await getJWT(req, res)
 	if (!JWT) { return }
 
 	if (invalidJSON(req, res, {
