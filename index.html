@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>API Documentation</title>
+</head>
+<body>
+	<h1>API Documentation</h1>
+	<h2>Routes</h2>
+	<ul>
+		<li>
+			🔐 GET /users
+			<br>
+			Returns all users.
+		</li>
+		<li>
+			🔐 GET /users/{id}
+			<br>
+			Returns the user with the specified id if it exists, otherwise it returns status 204.
+		</li>
+		<li>
+			POST /sign-up
+			<br>
+			Creates a new user with the specified username and password if the username is not already in use. Don't worry, the password is hashed.
+		</li>
+		<li>
+			POST /sign-in
+			<br>
+			Returns a JWT that is used as bearer token in secure routes requiring authentication.
+		</li>
+	</ul>
+	<h2>Notes</h2>
+	<ul>
+		<li>Routes with the 🔐 requires authentication.</li>
+		<li>Both /sign-in and /sign-up require data in the form of a JSON object with a username and password field. See example below:
+			<br>
+			JSON example:
+			<br>
+			{
+			<br>
+			&emsp;"username": "neo",
+			<br>
+			&emsp;"password": "gulgul"
+			<br>
+			}
+		</li>
+	</ul>
+</body>
+</html>
