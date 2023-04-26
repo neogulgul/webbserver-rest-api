@@ -64,7 +64,7 @@ async function verifyJWT(req, res) {
 		const id = decoded.sub
 		const sql = db.prepSQL("SELECT * FROM users WHERE id = ?", [id])
 		const result = await db.SELECT(sql)
-		if (!result) { databaseError; return }
+		if (!result) { databaseError(res); return }
 
 		const valid = result.length === 1
 		if (valid) { return true }
@@ -113,7 +113,6 @@ const maxPasswordLength = 30
 
 const app = express()
 app.use(bodyParser.json())
-
 app.use(requestLogger)
 
 app.listen(port, () => {
@@ -149,7 +148,7 @@ app.post("/sign-up", async (req, res) => {
 
 	let sql = db.prepSQL("SELECT * FROM users WHERE username = ?", [username])
 	let result = await db.SELECT(sql)
-	if (!result) { databaseError; return }
+	if (!result) { databaseError(res); return }
 
 	const valid = result.length === 0
 	if (valid) {
@@ -157,7 +156,7 @@ app.post("/sign-up", async (req, res) => {
 		const hashedPassword = hash(salt + password)
 		sql = db.prepSQL("INSERT INTO users (username, password, salt) VALUES (?, ?, ?)", [username, hashedPassword, salt])
 		result = await db.EXECUTE(sql)
-		if (!result) { databaseError; return }
+		if (!result) { databaseError(res); return }
 		res.send(`User "${username}" was created successfully.`)
 	}
 	else {
@@ -175,7 +174,7 @@ app.post("/sign-in", async (req, res) => {
 
 	let sql = db.prepSQL("SELECT salt FROM users WHERE username = ?", [username])
 	let result = await db.SELECT(sql)
-	if (!result) { databaseError; return }
+	if (!result) { databaseError(res); return }
 
 	let valid = result.length === 1
 
@@ -186,7 +185,7 @@ app.post("/sign-in", async (req, res) => {
 	
 		sql = db.prepSQL("SELECT * FROM users WHERE username = ? AND password = ?", [username, hashedPassword])
 		result = await db.SELECT(sql)
-		if (!result) { databaseError; return }
+		if (!result) { databaseError(res); return }
 	
 		valid = result.length === 1
 		if (valid) {
@@ -214,7 +213,7 @@ app.put("/change-username", authentication, async (req, res) => {
 
 	let sql = db.prepSQL("SELECT * FROM users WHERE username = ?", [username])
 	let result = await db.SELECT(sql)
-	if (!result) { databaseError; return }
+	if (!result) { databaseError(res); return }
 
 	const id = JWT.sub
 
@@ -222,7 +221,7 @@ app.put("/change-username", authentication, async (req, res) => {
 	if (valid) {
 		sql = db.prepSQL("UPDATE users SET username = ? WHERE id = ?", [username, id])
 		result = await db.EXECUTE(sql)
-		if (!result) { databaseError; return }
+		if (!result) { databaseError(res); return }
 		res.send(`Your new username is "${username}".`)
 	} else {
 		if (id === result[0].id) {
