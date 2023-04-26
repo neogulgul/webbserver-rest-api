@@ -85,17 +85,13 @@ function getJWT(req) {
 	return decoded
 }
 
-const port = 3000
+async function getUsers(req, res, sql) {
+	const result = await db.SELECT(sql)
+	if (result) { res.send(result)
+	} else { databaseError(res) }
+}
 
-const tokenHours = 1
-const tokenSecret = hash(":^D")
-
-const maxUsernameLength = 30
-const maxPasswordLength = 30
-
-const app = express()
-app.use(bodyParser.json())
-
+// middleware
 function requestLogger(req, res, next) {
 	const date = Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "long"}).format(Date.now())
 	console.log(`${req.ip} [${date}] ${req.method} ${req.url}`)
@@ -107,6 +103,17 @@ async function authentication(req, res, next) {
 	if (valid) { next() }
 }
 
+const port = 3000
+
+const tokenHours = 1
+const tokenSecret = hash(":^D")
+
+const maxUsernameLength = 30
+const maxPasswordLength = 30
+
+const app = express()
+app.use(bodyParser.json())
+
 app.use(requestLogger)
 
 app.listen(port, () => {
@@ -117,29 +124,18 @@ app.get("/", (req, res) => {
 	res.sendFile(__dirname + "/index.html")
 })
 
+app.get("/users/me", authentication, async (req, res) => {
+	res.send(getJWT(req))
+})
+
 app.get("/users", authentication, async (req, res) => {
-	const result = await db.SELECT("SELECT id, username FROM users")
-	if (result) {
-		res.send(result)
-	} else {
-		databaseError(res)
-	}
+	getUsers(req, res, "SELECT id, username FROM users")
 })
 
 app.get("/users/:specifier", authentication, async (req, res) => {
 	const specifier = req.params.specifier
-
 	const sql = db.prepSQL("SELECT id, username FROM users WHERE id = ? OR username = ?", [specifier, specifier])
-	const result = await db.SELECT(sql)
-	if (result) {
-		res.send(result)
-	} else {
-		databaseError(res)
-	}
-})
-
-app.get("/users/me", authentication, async (req, res) => {
-	res.send(getJWT(req))
+	getUsers(req, res, sql)
 })
 
 app.post("/sign-up", async (req, res) => {
